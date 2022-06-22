@@ -1,0 +1,14 @@
+host ec2-34-194-73-236.compute-1.amazonaws.com
+
+database d248g083pk06ka
+
+port 5432
+
+USER 
+ltuncqvjqmernj
+
+password 
+25ce551005ecc623c3dd0e6e311145830d4e4c118e84e0950d9c12c64ff2fe23
+
+url 
+postgres://ltuncqvjqmernj:25ce551005ecc623c3dd0e6e311145830d4e4c118e84e0950d9c12c64ff2fe23@ec2-34-194-73-236.compute-1.amazonaws.com:5432/d248g083pk06ka
