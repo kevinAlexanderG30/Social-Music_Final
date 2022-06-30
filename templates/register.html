@@ -61,41 +61,62 @@
   <section id="hero" class="hero d-flex align-items-center">
   
     <div class="container">
-      <div id="login-form">
+      <div id="login-form2">
         <div class="row">
           <div class="col-lg-7">
-            <form>
+            <form action="/register" method="post">
               <h3 class="login-header">Sign in</h3>
               <div class="form-group">
-                <input type="email" class="form-control inputLogin" placeholder="Username or Email">
+                <input type="email" required name="email" class="form-control inputLogin" placeholder="Email">
               </div>
               <div class="form-group">
-                <input type="password" class="form-control inputLogin" placeholder="Password">
+                <input type="input" required  name="username" class="form-control inputLogin" placeholder="username">
               </div>
               <div class="form-group">
-                <input type="confirmation" class="form-control inputLogin " placeholder="Confirmation Password">
+                <input type="input" name="name" required class="form-control inputLogin" placeholder="Nombres">
               </div>
-              
-              <button type="button" class="btn btn-primary btn-lg btn-block submit">Login</button>
-    
+              <div class="form-group">
+                <input type="confirmation" required name="lastname" class="form-control inputLogin " placeholder="Apellidos">
+              </div>
+              <div class="form-group">
+                <input type="date" required name="nacimiento" class="form-control inputLogin" placeholder="Fecha de Nacimiento">
+              </div>
+              <div class="form-group">
+                <input type="password" required  name="password" class="form-control inputLogin" placeholder="Contraseña">
+              </div>
+              <div class="form-group">
+                <input type="password" required name="confirmacion_password" class="form-control inputLogin " placeholder="Confirmacion de Contraseña">
+              </div>
+              <!-- <button type="button" class="btn btn-primary btn-lg btn-block submit">Login</button> -->
+              <button type="submit" class="btn btn-block social-login register2">Login</button>
+              </form>
               <div class="row">
                 <div class="col text-center ">
-                  <a class="register" href="/login">Log In now</a>
+                  <!-- <a class="register" href="/login">Log In now</a> -->
+                  <div class="col text-center ">
+                    <a class="register" href="/login">Log In now</a>
+                  </div>
+                  
                 </div>
                 <!-- <div class="col text-center">
                   <a href="#" class="forgot-pass">forgot password?</a>
                 </div> -->
               </div>
-            </form>
+           
           </div>
           <div class="col-lg-5">
-            <button class="btn btn-block social-login facebook ">
-              <span class="social-icons">
-                <i class="fab fa-facebook-square fa-lg">
-                </i>
-              </span>
-              <span class="align-middle">Login with Facebook</span>
-            </button>
+
+          <form action="/login">
+              <button class="btn btn-block social-login facebook">
+                <span class="social-icons">
+                  <i class="fab fa-google fa-lg">
+                  </i>
+                </span>
+                <span class="align-middle">Log In now</span>
+              </button>
+          </form>
+
+          <form action="/login_google">
             <button class="btn btn-block social-login google">
               <span class="social-icons">
                 <i class="fab fa-google fa-lg">
@@ -103,11 +124,13 @@
               </span>
               <span class="align-middle">Login with Google</span>
             </button>
+          </form>
             
           </div>
         </div>
       </div>
     </div>
+    
   </section><!-- End Hero -->
 
 

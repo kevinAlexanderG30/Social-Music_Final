@@ -1,219 +1,206 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "layout.html" %}
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-
-  <title>Perfil</title>
-  <meta content="" name="description">
-
-  <meta content="" name="keywords">
-
-  <!-- Favicons -->
-  <link href="static/img/favicon.png" rel="icon">
-  <link href="static/img/apple-touch-icon.png" rel="apple-touch-icon">
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-
-  <!-- boostrap CSS Files -->
-  <link href="static/boostrap/aos/aos.css" rel="stylesheet">
-  <link href="static/boostrap/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <link href="static/boostrap/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
-  <link href="static/boostrap/glightbox/css/glightbox.min.css" rel="stylesheet">
-  <link href="static/boostrap/remixicon/remixicon.css" rel="stylesheet">
-  <link href="static/boostrap/swiper/swiper-bundle.min.css" rel="stylesheet">
-
-  <!-- Template Main CSS File -->
-  <link href="/static/style.css" rel="stylesheet">
+{% block title %}
+    Perfil
+{% endblock %}
 
 
-</head>
+{%block menu%}
+<div class="container">
+    
+  <div class="profile">
 
-<body>
-
-  <!-- ======= Header ======= -->
-  <header id="header" class="header fixed-top">
-    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
-
-      <a href="index.html" class="logo d-flex align-items-center">
-        <img src="static/img/logo.png" alt="">
-        <span>Social Music</span>
-      </a>
-
-      <nav id="navbar" class="navbar">
-        <ul>
-          <li><a class="nav-link scrollto" href="/inicio">Menu</a></li>
- 
-          <li class="dropdown"><a href="#"><span>Drop Down</span> <i class="bi bi-chevron-down"></i></a>
-            <ul>
-              <li><a href="#">Configuraciones</a></li>
-              <li><a href="#" href="logout">logout</a></li>
-              
-  
-            </ul>
-          </li>
-          <li><form class="d-flex nav-link scrollto">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            <button class="btn btn-outline-success" type="submit">Search</button>
-          </form></li>
-        </ul>
-        <i class="bi bi-list mobile-nav-toggle"></i>
-      </nav><!-- .navbar -->
-
+    <div class="profile-image">
+      {% if content.permitir_foto_google == True %}
+        <img src="{{content.url_perfil}}" alt="" width="123px" height="120px">
+      
+      {% elif content.permitir_foto_google == false %}
+        <img src="static/img/{{content.url_perfil}}" alt="" width="123px" height="120px">
+      
+      {%endif%}
     </div>
-  </header><!-- End Header -->
 
-  <!-- ======= Hero Section ======= -->
-  <section id="hero" class="hero d-flex align-items-center">
+    <div class="profile-user-settings">
+      
+      {% if content.username == None %}
+          <h1 class="profile-user-name">Actualice su informacion</h1>
+      {% else%}
+          <h1 class="profile-user-name">{{content.username}}</h1>
+      {%endif%}
 
-    <div class="container">
-      <div class="row">
-          <div class="col-md-12">
-              <div class="fb-profile-block">
-                  <div class="fb-profile-block-thumb cover-container"></div>
-                  <div class="profile-img">
-                      <a href="#">
-                          <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="" title="">        
-                      </a>
-                  </div>
-                  <div class="profile-name">
-                      <h2>Markins Smithertain</h2>
-                  </div>
-                  
-                  <div class="fb-profile-block-menu">
-                      <div class="block-menu">
-                          <ul>
-                              <li><a href="#">Seguidores</a></li>
-                              <li><a href="#">Siguiendo</a></li>
-                          </ul>
+      <button type="button" id="cambiar_x"class="btn2 btn-primary profile-edit-btn"  data-bs-toggle="modal" data-bs-target="#exampleModal">Edit Profile</button>
+        <!-- Button trigger modal -->
+         
+          <!-- Modal -->
+          <form action="/change_data_profile" method="post">
+          <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel">Edit Profile</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="main">
+                      <div id="subscription">
+                       
+                       <div id="sub__promo">                                
+                            
+                          <input type="text" required id="email username2" name="username" for="email" placeholder="Nombre de usuario {{content.username}}"/>
+                          <input type="text" required id="email name" name="name" value="{{content.name}}" for="email" placeholder="Nombre {{content.name}}"/>
+                          <input type="text" required id="email lastname" name="lastname" value="{{content.lastname}}" for="email" placeholder="Apellido {{content.lastname}}"/>
+                          <input type="text"  id="email descripcion" name="description" value="{{content.descripcion}}" for="email" placeholder="Descripcion {{content.descripcion}}"/>
+                          <input type="date" required id="email nacimiento" name="nacimiento" value="{{content.nacimiento}}" for="email" placeholder="Nacimiento {{content.nacimiento}}"/>
+                          
+                        </div>
+                        
                       </div>
-                      <div class="block-menu">
-                          <ul>
-                            <li><a href="#">Seguidores</a></li>
-                            <li><a href="#">Siguiendo</a></li>
-                          </ul>
-                      </div>
-                  </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
               </div>
-          </div>
-      </div>
-      </div>
-
-  </section><!-- End Hero -->
-
-  <main id="main">
-    <!-- ======= About Section ======= -->
-  
-
-    </section><!-- End About Section -->
-
-   
-   
-
-  <!-- ======= Footer ======= -->
-  <footer id="footer" class="footer">
-
-    <!-- <div class="footer-newsletter">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-12 text-center">
-            <h4>Our Newsletter</h4>
-            <p>Tamen quem nulla quae legam multos aute sint culpa legam noster magna</p>
-          </div>
-          <div class="col-lg-6">
-            <form action="" method="post">
-              <input type="email" name="email"><input type="submit" value="Subscribe">
-            </form>
-          </div>
-        </div>
-      </div>
-    </div> -->
-
-    <div class="footer-top">
-      <div class="container">
-        <div class="row gy-4">
-          <div class="col-lg-5 col-md-12 footer-info">
-            <a href="index.html" class="logo d-flex align-items-center">
-              <img src="static/img/logo.png" alt="">
-              <span>Social Music</span>
-            </a>
-            <p>Social Music.</p>
-            <div class="social-links mt-3">
-              <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-              <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-              <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-              <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
             </div>
           </div>
+        </form>
+      <!-- <button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog" aria-hidden="true"></i></button> -->
 
-          <div class="col-lg-2 col-6 footer-links">
-            <h4>Useful Links</h4>
-            <ul>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Services</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Terms of service</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Privacy policy</a></li>
-            </ul>
+    </div>
+
+    <div class="profile-stats">
+
+      <ul>
+        <li><span class="profile-stat-count">{{content.post}}</span> posts</li>
+        <li><span class="profile-stat-count">{{content.seguidores}}</span> followers</li>
+        <li><span class="profile-stat-count">{{content.seguidos}}</span> following</li>
+      </ul>
+
+    </div>
+
+    <div class="profile-bio">
+
+      <p><span class="profile-real-name">{{content.name}} {{content.lastname}}</span></p>
+      <p><span class="profile-real-name"></span> {{content.descripcion}}</p>
+
+    </div>
+
+  </div>
+  <!-- End of profile section -->
+
+</div>
+<!-- End of container -->
+{%endblock%}
+
+{% block main %}
+<!-- End About Section -->
+<section class="main-content">
+  <div class="">
+    {% for items in item %}
+    <br>
+    <br>
+    <div class="row">
+      
+      <div class="col-sm-6 offset-sm-3">
+        <div class="post-block">
+          <div class="d-flex justify-content-between">
+            <div class="d-flex mb-3">
+              <div class="mr-2">
+                {% if content.permitir_foto_google == True %}
+                
+                  <a href="#!" class="text-dark"><img src="{{content.url_perfil}}" alt="User" class="author-img"></a>
+                
+                {% elif content.permitir_foto_google == false %}
+                <a href="#!" class="text-dark"><img src="static/img/{{content.url_perfil}}" alt="User" class="author-img"></a>
+                
+                {%endif%}
+                
+              </div>
+              <div>
+                <h5 class="mb-0"><a href="#!" class="text-dark">{{items.username}}</a></h5>
+                <p class="mb-0 text-muted">{{items.date }}</p>
+              </div>
+            </div>
+            <div class="post-block__user-options">
+              <a href="#!" id="triggerId" data-toggle="dropdown" aria-haspopup="true"
+                  aria-expanded="false">
+                    <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="triggerId">{{items.id}}
+                <a class="dropdown-item text-dark" href="{{url_for('EditarPublicacion',id=items.id)}}"><i class="fa fa-pencil mr-1"></i>Edit</a>
+                <a class="dropdown-item text-danger" href="{{url_for('EliminarPublicacion',id=items.id)}}"><i class="fa fa-trash mr-1"></i>Delete</a>
+              </div>
+            </div>
           </div>
-<!-- 
-          <div class="col-lg-2 col-6 footer-links">
-            <h4>Our Services</h4>
-            <ul>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Web Development</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Product Management</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Marketing</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Graphic Design</a></li>
-            </ul>
-          </div> -->
-
-          <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
-            <h4>Contact Us</h4>
-            <p>
-             Nicaragua <br>
-             Managua, 1100<br>
-              Americas #1 <br><br>
-              <strong>Phone:</strong> +505 8488 7264<br>
-              <strong>Email:</strong> socialMusic@gmail.com <br>
-            </p>
-
+          <div class="post-block__content mb-2">
+            <p>{{items.descripcion}}</p>
+            <img src="static/img/{{items.image_path}}" alt="Content img">
           </div>
-
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-2">
+              <div class="d-flex">
+                <a href="#!" class="text-danger mr-2"><span><i class="fa fa-heart"></i></span></a>
+                <a href="#!" class="text-dark mr-2"><span>Comment</span></a>
+              </div>
+              <a href="#!" class="text-dark"><span>Share</span></a>
+            </div>
+            <p class="mb-0">Liked by <a href="#!" class="text-muted font-weight-bold">John doe</a> & <a href="#!" class="text-muted font-weight-bold">25 others</a></p>
+          </div>
+          <hr>
+          <div class="post-block__comments">
+            <!-- Comment Input -->
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Add your comment">
+              <div class="input-group-append">
+                  <button class="btn btn-primary" type="button" id="button-addon2"><i class="fa fa-paper-plane"></i></button>
+              </div>
+            </div>
+            <!-- Comment content -->
+            <div class="comment-view-box mb-3">
+              <div class="d-flex mb-2">
+                <img src="/templates/img/user2.jpg" alt="User img" class="author-img author-img--small mr-2">
+                <div>
+                  <h6 class="mb-1"><a href="#!" class="text-dark">John doe</a> <small class="text-muted">1m</small></h6>
+                  <p class="mb-1">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                  <div class="d-flex">
+                    <a href="#!" class="text-dark mr-2"><span><i class="fa fa-heart-o"></i></span></a>
+                    <a href="#!" class="text-dark mr-2"><span>Reply</span></a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- More Comments -->
+            <hr>
+            <a href="#!" class="text-dark">View More comments <span class="font-weight-bold">(12)</span></a>
+          </div>
         </div>
       </div>
+      
     </div>
+    {%endfor%}
+  </div>
+  
 
-    <div class="container">
-      <div class="copyright">
-        &copy; Copyright <strong><span>WEB50</span></strong>. All Rights Reserved
-      </div>
-      <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/flexstart-bootstrap-startup-template/ -->
-        Designed by <a href="#">Social Music</a>
-      </div>
-    </div>
-  </footer><!-- End Footer -->
+</section>
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<script>
+  //var selectid = document.querySelector("#username"), test = '{{content | tojson }}' ;
+  //console.log('{{content | tojson }}')
+  //var username =document.getElementsByName("username")
+  //console.log(username[0].tagName);
+  //=  '{{content | tojson }}'
+  
+  
+  
+</script>
 
-  <!-- boostrap JS Files -->
-  <script src="static/boostrap/purecounter/purecounter.js"></script>
-  <script src="static/boostrap/aos/aos.js"></script>
-  <script src="static/boostrap/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="static/boostrap/glightbox/js/glightbox.min.js"></script>
-  <script src="static/boostrap/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="static/boostrap/swiper/swiper-bundle.min.js"></script>
-  <script src="static/boostrap/php-email-form/validate.js"></script>
+{%endblock%}
 
-  <!-- Template Main JS File -->
-  <script src="static/js/main.js"></script>
 
-</body>
 
-</html>
+      
+ 
+    
+   
+   

@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Login</title>
+  <title>Inicio</title>
   <meta content="" name="description">
 
   <meta content="" name="keywords">
@@ -24,12 +24,16 @@
   <link href="static/boostrap/glightbox/css/glightbox.min.css" rel="stylesheet">
   <link href="static/boostrap/remixicon/remixicon.css" rel="stylesheet">
   <link href="static/boostrap/swiper/swiper-bundle.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
-  <!-- Template Main CSS File -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	
+   <!-- Template Main CSS File -->
   <link href="/static/style.css" rel="stylesheet">
+  
+
+
 </head>
 
 <body>
@@ -45,11 +49,20 @@
 
       <nav id="navbar" class="navbar">
         <ul>
-          <li><a class="nav-link scrollto active" href="/">Home</a></li>
-          <li><a class="nav-link scrollto" href="#about">About</a></li>
-          <li><a class="nav-link scrollto" href="/login">Login</a></li>
-          <li><a class="nav-link scrollto" href="/register">Register</a></li>         
-          <li><a class="getstarted scrollto" href="/login">A socializar!</a></li>
+          <li><a class="nav-link scrollto" href="/perfil">Perfil</a></li>         
+          <li><a class="nav-link scrollto" href="/Inicio">Menu</a></li>           
+          <li class="dropdown"><a href="#"><span>Configuraciones</span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="#">Drop Down 1</a></li>
+              <li><a href="/logout">logout</a></li>
+              
+  
+            </ul>
+          </li>
+          <li><form class="d-flex nav-link scrollto">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+          </form></li>
         </ul>
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
@@ -58,61 +71,29 @@
   </header><!-- End Header -->
 
   <!-- ======= Hero Section ======= -->
-  <section id="hero" class="hero d-flex align-items-center">
-  
-    <div class="container">
-      <div id="login-form">
-        <div class="row">
-          <div class="col-lg-7">
-            <form action="/login" method="post">
-              <h3 class="login-header">Sign in</h3>
-              <div class="form-group">
-                <input type="email" name="email"  required class="form-control inputLogin" placeholder="Email">
-              </div>
-              <div class="form-group">
-                <input type="password" name="password" required class="form-control inputLogin" placeholder="Password">
-              </div>
-    
-              <button type="submit" class="btn btn-primary btn-lg btn-block submit">Login</button>
-    
-              <div class="row">
-                <div class="col text-center ">
-                  <a class="register" href="/register">register now</a>
-                </div>
-               
-                <!-- <div class="col text-center">
-                  <a href="#" class="forgot-pass">forgot password?</a>
-                </div> -->
-              </div>
-            </form>
-          </div>
-          <div class="col-lg-5">
-              <form action="/register">
-              <button class="btn btn-block social-login facebook ">
-                <span class="social-icons">
-                  <i class="fab fa-facebook-square fa-lg">
-                  </i>
-                </span>
-                <span class="align-middle">register now</span>
-              </button>
-            </form>
-            
-          <form action="/login_google">
-            <button type="submit" class="btn btn-block social-login google">
-              <span class="social-icons">
-                <i class="fab fa-google fa-lg">
-                </i>
-              </span>
-              <span class="align-middle">Login with Google</span>
-            </button>
-          </form>
-            
-          </div>
-        </div>
+  <!-- <section id="hero" class="hero d-flex align-items-center">
+  </section>End Hero -->
+  <main id="main">
+    <div class="profile2">
+    <div class="photo"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/764024/profile/profile-512.jpg"/></div>
+    <div class="content">
+      <div class="text">
+        <h3>Kelly Chen</h3>
+        <h6>Front-end Web Designer</h6>
       </div>
+      <div  class="btn5"><span><a href=""></a></span></div>
     </div>
-  </section><!-- End Hero -->
+    
+    <!-- <div class="box"><i class="fa fa-codepen"></i><i class="fa fa-facebook"></i><i class="fa fa-github"></i><i class="fa fa-tumblr"></i><i class="fa fa-twitter"></i></div> -->
+  
+</div>
+</main>
+    <!-- ======= About Section ======= -->
+    
+   <!-- End About Section -->
 
+   
+   
 
   <!-- ======= Footer ======= -->
   <footer id="footer" class="footer">
@@ -212,7 +193,10 @@
   <script src="static/boostrap/isotope-layout/isotope.pkgd.min.js"></script>
   <script src="static/boostrap/swiper/swiper-bundle.min.js"></script>
   <script src="static/boostrap/php-email-form/validate.js"></script>
-
+   
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
   <!-- Template Main JS File -->
   <script src="static/js/main.js"></script>
 
