@@ -1,22 +1,37 @@
-from flask import Flask, redirect, render_template, request, session, abort
+from sqlite3 import Row
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, abort, url_for
 from flask_session import Session
+import jwt
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
 import pathlib
-from flask import redirect, session
 from functools import wraps
 import requests
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+from werkzeug.utils import secure_filename
+from os import remove
+#from flask_socketio import SocketIO, emit #join_room, leave_room
+from datetime import datetime, timedelta
+
 
 app = Flask(__name__)
 app = Flask("Google Login App")
-app.secret_key = "CodeSpecialist.com"
+app.secret_key = "kevin"
 
+
+#carpetas 
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+#Perfil
+UPLOAD_FOLDER = 'D:\\Desktop\\\\cs50w-project4\\static\\img'
+#publicaciones
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -29,17 +44,17 @@ flow = Flow.from_client_secrets_file(
     redirect_uri="http://127.0.0.1:5000/callback"
 )
 
-# def login_required(f):
-#     """
-#     Decorate routes to require login.
-#     http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
-#     """
-#     @wraps(f)
-#     def decorated_function(*args, **kwargs):
-#         if session.get("user_id") is None:
-#             return redirect("/login")
-#         return f(*args, **kwargs)
-#     return decorated_function
+def login_required(f):
+    """
+    Decorate routes to require login.
+    http://flask.pocoo.org/docs/0.12/patterns/viewdecorators/
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if session.get("google_id") is None:
+            return redirect("/login")
+        return f(*args, **kwargs)
+    return decorated_function
 
 def login_is_required(function):
     def wrapper(*args, **kwargs):
@@ -78,32 +93,34 @@ def index():
 def login():
     session.clear()
     if request.method == "POST":
-        username = request.form.get("username").strip()
+        email = request.form.get("email").strip()
         password = request.form.get("password").strip()
 
         # verificamos si el usuario nuevo ingreso en algo en los campos correspondientes
-        if not username:
-            return render_template("index.html")
+        if not email:
+            return render_template("login.html")
 
         elif not password:
-            return render_template("index.html")
+            return render_template("login.html")
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username", {"username": username}).fetchall()
+        rows = db.execute("SELECT * FROM users WHERE email = :email", {"email": email}).fetchall()
         # print(f"{rows}")
-
+        #print(f" is_verified {rows[0]['is_verified']}")
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-            return render_template("index.html")
+           return jsonify({"Error de conexion": "Verifique bien su email o password"})
+        
+        if rows[0]['is_verified'] == False:
+            return jsonify({"Error de conexion": "Antes de acceder a esta ruta verifique su correo"})
 
         # Remember which user has logged in
-        session["name"] = rows[0]["username"]
+        session["name"] = rows[0]["email"]
         session["google_id"] = rows[0]["id"]
-        session["email"] = "No Correo"
+        session["email"] =  rows[0]["email"]
 
         return redirect("/Inicio")
     return render_template("login.html")
-
 
 # Login with Google
 @app.route("/login_google")
@@ -126,46 +143,90 @@ def logout():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
-        username = request.form.get("username").strip()
+        email = request.form.get("email").strip()
+        name = request.form.get("name").strip()
+        lastname = request.form.get("lastname").strip()
+        nacimiento = request.form.get("nacimiento").strip()
         password = request.form.get("password").strip()
-        confirmation = request.form.get("confirmation").strip()
-
+        confirmacion_password = request.form.get("confirmacion_password").strip()
+        username = request.form.get("username").strip()
         # verificamos si el usuario nuevo ingreso en algo en los campos correspondientes
-        if not username:
+        if not email or not name or not lastname or not nacimiento or not password or not confirmacion_password or not username:
             return render_template("register.html")
 
-        elif not password:
+        elif password != confirmacion_password:
             return render_template("register.html")
 
-        elif password != confirmation:
-            return render_template("register.html")
-
-
+        # return jsonify({"email": email, 
+        #                 "name": name, "lastname":lastname, 
+        #                 "nacimiento":nacimiento, 
+        #                 "password":password, 
+        #                 "confirmacion_password": confirmacion_password   })
+       
         # Verificamos si el nombre del usuario esta disponible
-        consulta = db.execute("SELECT username FROM users WHERE username = :username", {"username": username}).fetchall()
+        consulta = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchall()
         print(f"{consulta}")
+        consulta2 = db.execute("SELECT username FROM users WHERE username = :username", {"username": username}).fetchall()
         
+        if len(consulta2) != 0:
+            return "nombre de usuario no disponible"
+
         if len(consulta) != 0:
-            print("Ho0la")
-            return render_template("register.html")
+            #print("Ho0la")
+            return "Email no disponible"
         
-        print("Hola")
+        #print("Hola")
         
         # insertamos al nuevo usuario
-        rows = db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash) RETURNING id",
-                            {"username": username, "hash": generate_password_hash(password)}).fetchone()
-
-        name = db.execute("SELECT username FROM users WHERE username = :username", {"username": username}).fetchone()
+        db.execute("INSERT INTO users (hash, name, lastname, email, nacimiento, is_verified, foto_google, username) \
+                        VALUES (:hash, :name, :lastname, :email, :nacimiento, :is_verified, :foto_google, :username)",
+                            {"hash": generate_password_hash(password), "name": name,
+                             "lastname": lastname, "email": email, "is_verified": False,
+                              "nacimiento": nacimiento, "foto_google": False, "username": username })
+        #print(f"consulta: {rows}")
+        #email = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
         db.commit()
 
-        print(name)
-        session["name"] = name[0]
-        session["google_id"] = rows[0]
-    
-        session["email"] = "No Correo"
-       
+        #print(name)
+        #session["name"] = name[0]
+        #session["google_id"] = rows[0]
+        
+        #create jwt
+        payload_data = {
+            "name": name,
+            "email":email,
+            "lastname": lastname,
+            "nacimiento": nacimiento,
+            "is_verified": True,
+            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=1000),
 
-        return redirect("/Inicio")
+        }
+
+        token= jwt.encode(
+                            payload=payload_data, 
+                            key="my_secret_key",  
+                            algorithm="HS256"
+                            )
+        print(token)
+        #print(f"Hora: {datetime.datetime.utcnow() + datetime.timedelta(minutes=1000) }")
+        #session["email"] = "No Correo"
+        
+        #Envio de confirmacion
+        message = Mail(
+        from_email='tkxk3vin@gmail.com',
+        to_emails=email,
+        subject='Social Musci WEB50-FINAL',
+        html_content= f'Confirmacion de email por parte de Social Music <a href="http://localhost:5000/is_verified/{token}">"Confirmar"</a> {token}')
+        try:
+            sg = SendGridAPIClient("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")
+            response = sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+        except Exception as e:
+            print(str(e))
+
+        return redirect("/login")
     else:
        return render_template("register.html")
 
@@ -187,17 +248,297 @@ def callback():
         audience=GOOGLE_CLIENT_ID
     )
     print(id_info)
-    session["google_id"] = id_info.get("sub")
-    session["name"] = id_info.get("name")
-    session["email"] = id_info.get("email")
-    return redirect("/Inicio")
+
+    rows = db.execute("SELECT * FROM users WHERE email = :email", {"email": id_info.get("email")}).fetchall()
+    print(rows)
+    if len(rows):
+        if rows[0]["email"] == id_info.get("email"):
+            session["google_id"] = rows[0]['id']
+            session["name"] = id_info.get("name")
+            session["email"] = id_info.get("email")
+            print("Entro en la parte para no registrar")
+            return redirect("/Inicio")
+    else:
+        password = "123456"
+        db.execute("INSERT INTO users (hash, name, lastname, email, url_perfil ,nacimiento, is_verified, foto_google) \
+                    VALUES (:hash, :name, :lastname, :email, :url_perfil, :nacimiento, :is_verified, :foto_google)",
+                            {"hash": generate_password_hash(password), "name": id_info.get("given_name"), 
+                            "lastname": id_info.get("family_name"), "email": id_info.get("email"), 
+                            "url_perfil": id_info.get("picture"),"is_verified": True, 
+                            "nacimiento": "2003-08-30", "foto_google": True })
+        
+        #print(f"consulta: {rows}")
+        #email = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
+        db.commit()
+        rows_id = db.execute("SELECT id FROM users WHERE email = :email", {"email": id_info.get("email")}).fetchall()
+        #print(f"Id de usuario: {rows_id[0]['id']}")
+        #Envio de confirmacion
+        session["google_id"] = rows_id[0]['id']
+        session["name"] =  id_info.get("email")
+        session["email"] =  id_info.get("email")
+        
+        message = Mail(
+        from_email='tkxk3vin@gmail.com',
+        to_emails= id_info.get("email"),
+        subject='Social Musci WEB50-FINAL',
+        html_content= f'Bienvenido a Social Music, usted podra acceder mediante Google o el inicio rapido de la app con una contraseña proporcionada: 123456 luego podra cambiar usted la contraseña una vez ingresado en la app igualmente su informacion y nombre<a href="http://localhost:5000/login">"Confirmar"</a>')
+        try:
+            sg = SendGridAPIClient("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")
+            response = sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+        except Exception as e:
+            print(str(e))
+        return redirect("/Inicio")
 
 @app.route("/Inicio")
-@login_is_required
+@login_is_required#a342c17486f965a89c3331ab5ff29e9f10a3aedb564aeae1208945cb602a24a9
 def Inicio():
     name = session["name"]
+    #resp = requests.get('http://ip-api.com/json/208.80.152.201')
+    #json.loads(resp.content)
+    #print(resp.content)
+    #return jsonify(resp= "hola")
     email = session["email"]
+    
     return render_template("inicio.html", name=name, email=email)
+
+@app.route("/perfil")
+@login_required
+def perfil():
+    seguidores = db.execute("SELECT user_id_follows FROM follows WHERE user_id_follows=:id", 
+    {"id": session["google_id"] }).fetchall()
+    seguidores = len(seguidores)
+    
+    seguidos = db.execute("SELECT user_id FROM follows WHERE user_id=:id", 
+    {"id": session["google_id"] }).fetchall()
+    
+    seguidos = len(seguidos)
+    
+    rows = db.execute("SELECT * FROM users WHERE id=:id", {"id": session["google_id"]}).fetchall()
+    rows2 = db.execute("SELECT users.id, publication.id, publication.image_path, publication.descripcion, publication.date, users.username FROM users INNER JOIN publication ON  publication.user_id = users.id  WHERE users.id = :id", \
+                    {"id": session["google_id"]}).fetchall()
+    #print(f"rows2: {rows2[0]['id']}")
+    #rows2
+    #SELECT users.id,publication.image_path,publication.descripcion,publication.date,users.username FROM users INNER JOIN publication ON users.id = publication.user_id
+    post = len(rows2)
+    content = {
+        "name": rows[0]["name"],
+        "lastname": rows[0]["lastname"],
+        "url_perfil": rows[0]["url_perfil"],
+        "descripcion": rows[0]["descripcion"],
+        "nacimiento": rows[0]["nacimiento"],
+        "permitir_foto_google": rows[0]["foto_google"],
+        "username": rows[0]["username"],
+        "post": post,
+        "seguidores": seguidores,
+        "seguidos": seguidos,
+        
+        
+    }
+    
+    
+    return render_template("perfil.html", content=content,item=rows2)
+
+@app.route("/is_verified/<string:token>")
+def is_verified(token):
+    print(token) 
+    SECRET_KEY = "my_secret_key"
+    #token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1Ni...."
+    try:
+        decode_data = jwt.decode(jwt=token, \
+                                key=SECRET_KEY, algorithms="HS256")
+        print("token es: ")
+        print(decode_data)
+        #consulta = db.execute("SELECT * FROM users WHERE email = :email", {"email": decode_data["email"]}).fetchall()
+        #print(consulta)
+        #Actualizar al usuario que ha confirmado
+        db.execute("UPDATE users SET is_verified = :is_verified WHERE email = :email", 
+                    {"is_verified": decode_data["is_verified"], "email": decode_data["email"]})
+        db.commit()
+   #SELECT users.id,publication.image_path,publication.descripcion,publication.date,users.username FROM users INNER JOIN publication ON users.id = publication.user_id 
+    except Exception as e:
+        message = f"Token is invalid --> {e}"
+        print({"message": message})
+
+    return jsonify({"decode_data"
+    : decode_data}) #render_template("verified.html")
+
+@app.route("/configuraciones", methods=["GET", "POST"])
+def configuraciones():
+    if request.method == "POST":
+        return render_template("configuraciones.html")
+    return render_template("configuraciones.html")
+
+@app.route("/change_data_profile", methods=["POST"])
+def change_data_profile():
+    username = request.form.get("username")
+    name = request.form.get("name")
+    lastname = request.form.get("lastname")
+    descripcion = request.form.get("description")
+    nacimiento = request.form.get("nacimiento")
+    if  username == None:
+        return "El valor que desea actualizar no es un valor permitido en el campo de username"
+    if not username or not name or not lastname or not nacimiento:
+        return "No ha introducido en los campos antes mostrado"
+    db.execute("UPDATE users SET name = :name, lastname = :lastname, \
+        nacimiento = :nacimiento, descripcion = :descripcion, username = :username WHERE id = :id",
+         {"name": name, "lastname": lastname, 
+         "lastname": lastname,
+         "nacimiento": nacimiento, "descripcion":descripcion, "username": username,
+         "id": session["google_id"]})
+    
+    #db.execute("UPDATE users SET url_perfil = :url_perfil WHERE id = :id", {"url_perfil": request.files['file'].filename, "id": rows[0]})
+    db.commit()
+    return redirect("/perfil")
+
+@app.route("/change_perfil", methods=["POST"])
+def change_perfil():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        rows = db.execute("SELECT id, url_perfil FROM users WHERE email = :email", {"email": session["email"]}).fetchone()
+       #print(rows[1])
+        delete_perfil = rows[1]
+
+        try:
+            remove(f"D:\\Desktop\\cs50w-project4\\static\\img\\{delete_perfil}")
+
+        except OSError:
+            print("No hay que borrar nada")
+
+        #cambiar nombre del perfil
+        type_image = request.files['file'].content_type
+        #'png', 'jpg', 'jpeg', 'gif'
+        if type_image == "image/png":
+            request.files['file'].filename = f"perfil_user{rows[0]}.png"
+        elif type_image == "image/jpg":
+            request.files['file'].filename = f"perfil_user{rows[0]}.jpg"
+        elif type_image == "image/jpeg":
+            request.files['file'].filename = f"perfil_user{rows[0]}.jpeg"
+        elif type_image == "image/gif":
+            request.files['file'].filename = f"perfil_user{rows[0]}.gif"
+        
+        #actulizar tabla del nombre de la foto de perfil
+        db.execute("UPDATE users SET url_perfil = :url_perfil \
+        WHERE id = :id", {"url_perfil": request.files['file'].filename, "id": rows[0]})
+        db.commit()
+
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        else:
+            return "El archivo que esta tratando de subir no es una imagen"
+        return redirect("/perfil")
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route("/submit_post", methods=["POST"])
+def submit_post():
+    if request.method == 'POST':
+        descripcion = request.form.get("descripcion")
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        rows = db.execute("SELECT id, publicaciones_incremental FROM users WHERE email = :email", {"email": session["email"]}).fetchone()
+        
+        publicacion_incremental = rows[1]
+
+        if publicacion_incremental == None:
+            publicacion_incremental = 0
+
+        else:
+            publicacion_incremental = rows[1]
+        print(publicacion_incremental)
+        publicacion_incremental2= int(publicacion_incremental)+1
+
+        db.execute("UPDATE users SET publicaciones_incremental = :publicaciones_incremental \
+        WHERE id = :id", {"publicaciones_incremental": str(publicacion_incremental2), "id": rows[0]})
+        db.commit()
+
+        rows2 = db.execute("SELECT * FROM publication WHERE user_id = :user_id", {"user_id": session["google_id"]}).fetchall()
+
+        #cambiar nombre del perfil
+        type_image = request.files['file'].content_type
+        #'png', 'jpg', 'jpeg', 'gif'
+        if type_image == "image/png":
+            request.files['file'].filename = f"{publicacion_incremental}post_profile{rows[0]}.png"
+        elif type_image == "image/jpg":
+            request.files['file'].filename = f"{publicacion_incremental}post_profile{rows[0]}.jpg"
+        elif type_image == "image/jpeg":
+            request.files['file'].filename = f"{publicacion_incremental}post_profile{rows[0]}.jpeg"
+        elif type_image == "image/gif":
+            request.files['file'].filename = f"{publicacion_incremental}post_profile{rows[0]}.gif"
+        now = datetime.now()
+        #actulizar tabla del nombre de la foto de perfil
+        db.execute("INSERT INTO publication (image_path, user_id, descripcion, date) \
+                        VALUES (:image_path, :user_id, :descripcion, :date)",
+                            {"image_path": request.files['file'].filename, "user_id": session["google_id"],                            
+                              "descripcion": descripcion, "date": now.strftime("%Y/%m/%d")  })
+        db.commit()
+
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        else:
+            return "El archivo que esta tratando de subir no es una imagen"
+        return redirect("/perfil")
+
+@app.route("/EditarPublicacion/<string:id>", methods=["GET","POST"])
+def EditarPublicacion(id):
+    if request.method == "POST":
+        descripcion = request.form.get("descripcion")
+        db.execute("UPDATE publication SET descripcion = :descripcion \
+        WHERE id = :id", {"descripcion": descripcion, "id": id})
+        db.commit()
+
+        return redirect("/perfil")
+
+    rows=db.execute("SELECT * FROM publication WHERE id=:id", {"id": id}).fetchone()
+    print(rows)
+    return render_template("EditPublicacion.html", rows=rows)
+
+@app.route("/EliminarPublicacion/<string:id>")
+def EliminarPublicacion(id):
+    rows = db.execute("SELECT image_path FROM publication WHERE id=:id", {"id": id}).fetchall()
+    print(rows)
+    try:
+        remove(f"D:\\Desktop\\projectFinal\\cs50w-project4\\static\\img\\{rows[0]['image_path']}")
+
+    except OSError:
+            print("No hay que borrar nada")
+
+    db.execute("DELETE FROM publication WHERE id=:id", {"id": id})
+    db.commit()
+    return redirect("/perfil")
+
+@app.route("/search")
+def search():
+    return render_template("search.html")
+
+@app.errorhandler(404)
+# inbuilt function which takes error as parameter
+def not_found(e):
+# defining function
+  return "404" #render_template("404.html")
 
 if __name__ == "__main__":
     app.run(debug=True)
