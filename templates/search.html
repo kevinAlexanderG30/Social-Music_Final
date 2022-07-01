@@ -59,8 +59,8 @@
   
             </ul>
           </li>
-          <li><form class="d-flex nav-link scrollto">
-            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <li><form  action="/search" method="get" class="d-flex nav-link scrollto"  role="search">
+            <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success" type="submit">Search</button>
           </form></li>
         </ul>
@@ -74,19 +74,37 @@
   <!-- <section id="hero" class="hero d-flex align-items-center">
   </section>End Hero -->
   <main id="main">
-    <div class="profile2">
-    <div class="photo"><img src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/764024/profile/profile-512.jpg"/></div>
-    <div class="content">
-      <div class="text">
-        <h3>Kelly Chen</h3>
-        <h6>Front-end Web Designer</h6>
-      </div>
-      <div  class="btn5"><span><a href=""></a></span></div>
-    </div>
     
-    <!-- <div class="box"><i class="fa fa-codepen"></i><i class="fa fa-facebook"></i><i class="fa fa-github"></i><i class="fa fa-tumblr"></i><i class="fa fa-twitter"></i></div> -->
-  
-</div>
+    
+        <section class="bg-faded container-fluid">
+          {%for resultado in resultados%}
+          <div class="row py-3 flex-items-sm-center justify-content-center">
+            <!--
+        User Card
+        -->
+        
+            <div class="col-xs-12 col-sm-3 py-2 clearfix">
+              <div class="card profile-card">
+                <figure>
+                  <!-- <input id="fab" type="checkbox" class="fab"><label for="fab" class="toggle">+</label>-->
+                   
+                  {% if resultado.foto_google == True %}
+                  <a href="{{url_for('searchprofile',id=resultado.id_users)}}"><img src="{{resultado.url_perfil}}" class="img-fluid img-profile" alt="Card image"></a>
+                  {% elif resultado.foto_google == False %}
+                  <a href="#"><img src="{{url_for('searchprofile',id=resultado.id_users)}}" class="img-fluid img-profile" alt="Card image"></a>
+                  {%endif%}
+                </figure>
+                <div class="card-block text-xs-center">
+                  <p class="h4 card-title font-weight-bold">{{resultado.username}}</p>
+                  <p class="h6 card-subtitle text-muted">{{resultado.name}}{{resultado.lastname}}</p><br>
+                </div>
+              </div>
+            </div>
+            
+          </div>
+          {%endfor%}
+        </section>
+        
 </main>
     <!-- ======= About Section ======= -->
     
