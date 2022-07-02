@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>{% block title %}{% endblock %}</title>
+  <meta content="" name="description">
+
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <!-- <link href="static/img/favicon.png" rel="icon">
+  <link href="static/img/apple-touch-icon.png" rel="apple-touch-icon"> -->
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- boostrap CSS Files -->
+  <link href="static/boostrap/aos/aos.css" rel="stylesheet">
+  <link href="static/boostrap/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="static/boostrap/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="static/boostrap/glightbox/css/glightbox.min.css" rel="stylesheet">
+  <link href="static/boostrap/remixicon/remixicon.css" rel="stylesheet">
+  <link href="static/boostrap/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	
+  <!-- boostrap 5-->
+  <!-- CSS only -->
+ 
+  <!-- Template Main CSS File -->
+  <link href="/static/style.css" rel="stylesheet">
+
+
+</head>
+
+<body>
+
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top">
+    <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
+
+      <a href="/perfil" class="logo d-flex align-items-center">
+        <img src="static/img/logo.png" alt="">
+        <span>Social Music</span>
+      </a>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a class="nav-link scrollto" href="/Inicio">Menu</a></li>
+          <li><a class="nav-link scrollto" href="/perfil">Perfil</a></li>
+          <li><a class="nav-link scrollto" href="/descargar">Descargar Go</a></li>
+              
+          <li class="dropdown"><a href="#"><span>Configuraciones
+           
+          </span> <i class="bi bi-chevron-down"></i></a>
+            <ul>
+              <li><a href="/configuraciones">Configuraciones</a></li>
+              <li><a href="/logout">logout</a></li>
+              
+  
+            </ul>
+          </li>  
+     
+        </form>  
+
+        
+        <li><form  action="/search" method="get" class="d-flex nav-link scrollto"  role="search">
+          <input class="form-control me-2" type="search" name="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form></li>
+     
+        </ul>
+
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav><!-- .navbar -->
+
+    </div>
+  </header><!-- End Header -->
+  <!-- Modal post -->
+  <form action="/submit_post" method=post enctype=multipart/form-data>
+  <div class="modal fade" id="exampleModal2" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Nuevo Post</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <input type=text name=descripcion placeholder="Descripcion">                             
+            <input type=file name=file required>                              
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+  <!-- Modal cambio de perfil -->
+<form action="/change_perfil" method=post enctype=multipart/form-data>
+  <div class="modal fade" id="exampleModal3" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Nuevo Perfil</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            
+            <input type=file name=file required>
+         
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit"  value="Upload" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+  <!-- ======= Hero Section ======= -->
+  <!-- End Hero -->
+
+  <main id="main" >
+    <!-- ======= About Section ======= -->
+    <header>
+
+        {% block menu %}
+        {% endblock %}
+    
+      </div>
+      <!-- End of container -->
+    
+    </header>
+
+    <!-- End About Section -->
+    <section class="main-content">
+       {%block main%}
+       {%endblock%}
+    </section>
+   
+   
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" class="footer">
+
+    <!-- <div class="footer-newsletter">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-lg-12 text-center">
+            <h4>Our Newsletter</h4>
+            <p>Tamen quem nulla quae legam multos aute sint culpa legam noster magna</p>
+          </div>
+          <div class="col-lg-6">
+            <form action="" method="post">
+              <input type="email" name="email"><input type="submit" value="Subscribe">
+            </form>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+    <div class="footer-top">
+      <div class="container">
+        <div class="row gy-4">
+          <div class="col-lg-5 col-md-12 footer-info">
+            <a href="index.html" class="logo d-flex align-items-center">
+              <img src="static/img/logo.png" alt="">
+              <span>Social Music</span>
+            </a>
+            <p>Social Music.</p>
+            <div class="social-links mt-3">
+              <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+              <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+              <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+              <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+            </div>
+          </div>
+
+          <div class="col-lg-2 col-6 footer-links">
+            <h4>Useful Links</h4>
+            <ul>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Services</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Terms of service</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Privacy policy</a></li>
+            </ul>
+          </div>
+<!-- 
+          <div class="col-lg-2 col-6 footer-links">
+            <h4>Our Services</h4>
+            <ul>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Web Development</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Product Management</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Marketing</a></li>
+              <li><i class="bi bi-chevron-right"></i> <a href="#">Graphic Design</a></li>
+            </ul>
+          </div> -->
+
+          <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+            <h4>Contact Us</h4>
+            <p>
+             Nicaragua <br>
+             Managua, 1100<br>
+              Americas #1 <br><br>
+              <strong>Phone:</strong> +505 8488 7264<br>
+              <strong>Email:</strong> socialMusic@gmail.com <br>
+            </p>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="copyright">
+        &copy; Copyright <strong><span>WEB50</span></strong>. All Rights Reserved
+      </div>
+      <div class="credits">
+        <!-- All the links in the footer should remain intact. -->
+        <!-- You can delete the links only if you purchased the pro version. -->
+        <!-- Licensing information: https://bootstrapmade.com/license/ -->
+        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/flexstart-bootstrap-startup-template/ -->
+        Designed by <a href="#">Social Music</a>
+      </div>
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- boostrap JS Files -->
+  <script src="static/boostrap/purecounter/purecounter.js"></script>
+  <script src="static/boostrap/aos/aos.js"></script>
+  <script src="static/boostrap/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="static/boostrap/glightbox/js/glightbox.min.js"></script>
+  <script src="static/boostrap/isotope-layout/isotope.pkgd.min.js"></script>
+  <script src="static/boostrap/swiper/swiper-bundle.min.js"></script>
+  <script src="static/boostrap/php-email-form/validate.js"></script>
+  <!-- socket-->
+  <!-- Template Main JS File -->
+  <script src="static/js/main.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

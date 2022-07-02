@@ -16,8 +16,8 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from werkzeug.utils import secure_filename
 from os import remove
-#from flask_socketio import SocketIO, emit #join_room, leave_room
 from datetime import datetime
+from functions import *
 
 app = Flask(__name__)
 app = Flask("Google Login App")
@@ -268,7 +268,7 @@ def callback():
         #print(f"consulta: {rows}")
         #email = db.execute("SELECT email FROM users WHERE email = :email", {"email": email}).fetchone()
         db.commit()
-        rows_id = db.execute("SELECT id FROM users WHERE email = :email", {"email": id_info.get("email")}).fetchall()
+        rows_id = db.execute("SELECT id_users FROM users WHERE email = :email", {"email": id_info.get("email")}).fetchall()
         #print(f"Id de usuario: {rows_id[0]['id']}")
         #Envio de confirmacion
         session["google_id"] = rows_id[0]['id_users']
@@ -293,6 +293,7 @@ def callback():
 @app.route("/Inicio")
 @login_is_required#a342c17486f965a89c3331ab5ff29e9f10a3aedb564aeae1208945cb602a24a9
 def Inicio():
+    print(f"Username google_id {session['google_id']}")
     name = session["name"]
     #resp = requests.get('http://ip-api.com/json/208.80.152.201')
     #json.loads(resp.content)
@@ -301,21 +302,30 @@ def Inicio():
     email = session["email"]
     likes = db.execute("SELECT  likes.megusta, likes.id_like, likes.user_id,publication.id \
         FROM publication INNER JOIN likes ON  likes.publication_id_likes = publication.id").fetchall()
-        
     
     
-    rows = db.execute("SELECT * FROM users WHERE id_users=:id", {"id": session["google_id"]}).fetchall()
+    
+    rows = db.execute("SELECT * FROM users WHERE id_users=:id_users", {"id_users": session['google_id']}).fetchall()
     #Imagenes de quien la publico dentro del inicio
-    rows2 = db.execute("SELECT users.id_users, publication.id, publication.image_path, \
+    rows2 = db.execute("SELECT users.id_users, users.foto_google, users.url_perfil,publication.id, publication.image_path, \
         publication.descripcion, publication.date, users.username \
-        FROM users INNER JOIN publication ON  publication.user_id = users.id_users", \
+        FROM users INNER JOIN publication ON  publication.user_id = users.id_users order by publication.id desc", \
                     {}).fetchall()
 
-    #
-    rows3 = db.execute("SELECT users.id_users, publication.id, commentary.id_comentario, \
-        publication.date, users.url_perfil, users.username, commentary.comentario, commentary.date \
-        FROM publication INNER JOIN users ON  users.id_users = publication.user_id \
-        INNER JOIN commentary ON commentary.publication_id =  publication.id ", \
+    # """SELECT users.id_users, publication.id, commentary.id_comentario, commentary.publication_id, 
+    #     users.url_perfil, users.username, commentary.comentario, commentary.date
+    #     FROM commentary INNER JOIN users ON  commentary .user_id = users.id_users
+    #     INNER JOIN publication ON  publication.id = commentary.publication_id"""
+
+    # """SELECT users.id_users, publication.id, commentary.id_comentario, commentary.publication_id, 
+    #     publication.date, users.url_perfil, users.username, commentary.comentario, commentary.date 
+    #     FROM publication INNER JOIN users ON  users.id_users = publication.user_id 
+    #     INNER JOIN commentary ON commentary.publication_id =  publication.id """
+
+    rows3 = db.execute("SELECT users.id_users, users.foto_google, publication.id, commentary.id_comentario, commentary.publication_id, \
+        users.url_perfil, users.username, commentary.comentario, commentary.date \
+        FROM commentary INNER JOIN users ON  commentary .user_id = users.id_users\
+        INNER JOIN publication ON  publication.id = commentary.publication_id", \
                     {}).fetchall()
 
     #print(f"rows2: {rows2[0]['id']}")
@@ -353,23 +363,39 @@ def perfil():
     {"id": session["google_id"] }).fetchall()
     
     seguidos = len(seguidos)
-    
+    ########    
+    #Informacion del perfil actual
     rows = db.execute("SELECT * FROM users WHERE id_users=:id", {"id": session["google_id"]}).fetchall()
+    
     #Imagenes de quien la publico dentro del perfil
-    rows2 = db.execute("SELECT users.id_users, publication.id, publication.image_path, \
+    rows2 = db.execute("SELECT users.id_users, users.foto_google, users.url_perfil,publication.id, publication.image_path, \
         publication.descripcion, publication.date, users.username \
-        FROM users INNER JOIN publication ON  publication.user_id = users.id_users  WHERE users.id_users = :id", \
+        FROM users INNER JOIN publication ON  publication.user_id = users.id_users WHERE users.id_users = :id order by publication.id desc", \
                     {"id": session["google_id"]}).fetchall()
 
-    #
-    rows3 = db.execute("SELECT users.id_users, publication.id, commentary.id_comentario, \
-        publication.date, users.url_perfil, users.username, commentary.comentario, commentary.date \
-        FROM publication INNER JOIN users ON  users.id_users = publication.user_id \
-        INNER JOIN commentary ON commentary.publication_id =  publication.id ", \
+    rows3 = db.execute("SELECT users.id_users, users.foto_google, publication.id, commentary.id_comentario, commentary.publication_id, \
+        users.url_perfil, users.username, commentary.comentario, commentary.date \
+        FROM commentary INNER JOIN users ON  commentary .user_id = users.id_users\
+        INNER JOIN publication ON  publication.id = commentary.publication_id", \
                     {}).fetchall()
 
+    ######{{url_for('EliminarComentarioAdmin',id=comentarios2.id_comentario users_id=comentarios2.user_id)}}
+    # rows = db.execute("SELECT * FROM users WHERE id_users=:id", {"id": session["google_id"]}).fetchall()
+    # #Imagenes de quien la publico dentro del perfil
+    # rows2 = db.execute("SELECT users.id_users, publication.id, publication.image_path, \
+    #     publication.descripcion, publication.date, users.username \
+    #     FROM users INNER JOIN publication ON  publication.user_id = users.id_users  WHERE users.id_users = :id", \
+    #                 {"id": session["google_id"]}).fetchall()
+
+    # #
+    # rows3 = db.execute("SELECT users.id_users, publication.id, commentary.id_comentario, \
+    #     publication.date, users.url_perfil, users.username, commentary.comentario, commentary.date \
+    #     FROM publication INNER JOIN users ON  users.id_users = publication.user_id \
+    #     INNER JOIN commentary ON commentary.publication_id =  publication.id ", \
+    #                 {}).fetchall()
+
     #print(f"rows2: {rows2[0]['id']}")
-    print(rows3[0].id_users)
+    print(rows)
     #SELECT users.id,publication.image_path,publication.descripcion,publication.date,users.username FROM users INNER JOIN publication ON users.id = publication.user_id
     post = len(rows2)
     content = {
@@ -457,6 +483,7 @@ def change_perfil():
         delete_perfil = rows[1]
 
         try:
+            
             remove(f"D:\\Desktop\\cs50w-project4\\cs50w-project4\\static\\img{delete_perfil}")
 
         except OSError:
@@ -475,8 +502,8 @@ def change_perfil():
             request.files['file'].filename = f"perfil_user{rows[0]}.gif"
         
         #actulizar tabla del nombre de la foto de perfil
-        db.execute("UPDATE users SET url_perfil = :url_perfil \
-        WHERE id_users = :id", {"url_perfil": request.files['file'].filename, "id": rows[0]})
+        db.execute("UPDATE users SET url_perfil = :url_perfil, foto_google=:foto_google \
+        WHERE id_users = :id", {"url_perfil": request.files['file'].filename, "foto_google": False,"id": rows[0]})
         db.commit()
 
         file = request.files['file']
@@ -492,10 +519,12 @@ def change_perfil():
             return "El archivo que esta tratando de subir no es una imagen"
         return redirect("/perfil")
 
+#Verifica el tipo de archivp
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+#Emite la imagen al servidor
 @app.route("/submit_post", methods=["POST"])
 def submit_post():
     if request.method == 'POST':
@@ -520,7 +549,7 @@ def submit_post():
         WHERE id_users = :id", {"publicaciones_incremental": str(publicacion_incremental2), "id": rows[0]})
         db.commit()
 
-        rows2 = db.execute("SELECT * FROM publication WHERE user_id = :user_id", {"user_id": session["google_id"]}).fetchall()
+        #rows2 = db.execute("SELECT * FROM publication WHERE user_id = :user_id", {"user_id": session["google_id"]}).fetchall()
 
         #cambiar nombre del perfil
         type_image = request.files['file'].content_type
@@ -534,12 +563,7 @@ def submit_post():
         elif type_image == "image/gif":
             request.files['file'].filename = f"{publicacion_incremental}post_profile{rows[0]}.gif"
         now = datetime.now()
-        #actulizar tabla del nombre de la foto de perfil
-        db.execute("INSERT INTO publication (image_path, user_id, descripcion, date) \
-                        VALUES (:image_path, :user_id, :descripcion, :date)",
-                            {"image_path": request.files['file'].filename, "user_id": session["google_id"],                            
-                              "descripcion": descripcion, "date": now.strftime("%Y/%m/%d")  })
-        db.commit()
+
 
         file = request.files['file']
         # if user does not select file, browser also
@@ -550,10 +574,18 @@ def submit_post():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+             #Insertar el post
+            db.execute("INSERT INTO publication (image_path, user_id, descripcion, date) \
+                        VALUES (:image_path, :user_id, :descripcion, :date)",
+                            {"image_path": request.files['file'].filename, "user_id": session["google_id"],                            
+                              "descripcion": descripcion, "date": now.strftime("%Y/%m/%d")  })
+            db.commit()
         else:
             return "El archivo que esta tratando de subir no es una imagen"
         return redirect("/perfil")
 
+#Editar publicacion del perfil
 @app.route("/EditarPublicacion/<string:id>", methods=["GET","POST"])
 def EditarPublicacion(id):
     if request.method == "POST":
@@ -568,6 +600,39 @@ def EditarPublicacion(id):
     print(rows)
     return render_template("EditPublicacion.html", rows=rows)
 
+#Editar publicacion desde el Inicio
+@app.route("/EditarPublicacionInicio/<string:id>", methods=["GET","POST"])
+def EditarPublicacionInicio(id):
+    if request.method == "POST":
+        descripcion = request.form.get("descripcion")
+        db.execute("UPDATE publication SET descripcion = :descripcion \
+        WHERE id = :id", {"descripcion": descripcion, "id": id})
+        db.commit()
+
+        return redirect("/Inicio")
+
+    rows=db.execute("SELECT * FROM publication WHERE id=:id", {"id": id}).fetchone()
+    print(rows)
+    return render_template("EditarPublicacionInicio.html", rows=rows)
+
+#Eliminar publicaciones desde el Inicio
+@app.route("/EliminarPublicacionInicio/<string:id>")
+def EliminarPublicacionInicio(id):
+    rows = db.execute("SELECT image_path FROM publication WHERE id=:id", {"id": id}).fetchall()
+    print(rows)
+    try:
+        remove(f"D:\\Desktop\\cs50w-project4\\cs50w-project4\\static\\img{rows[0]['image_path']}")
+
+    except OSError:
+            print("No hay que borrar nada")
+
+    db.execute("DELETE FROM publication WHERE id=:id", {"id": id})
+    db.execute("DELETE FROM commentary WHERE publication_id=:publication_id", {"publication_id": id})
+    db.execute("DELETE FROM likes WHERE publication_id_likes=:publication_id_likes", {"publication_id_likes": id})
+    db.commit()
+    return redirect("/Inicio")
+
+#Eliminar publicaciones desde el perfil
 @app.route("/EliminarPublicacion/<string:id>")
 def EliminarPublicacion(id):
     rows = db.execute("SELECT image_path FROM publication WHERE id=:id", {"id": id}).fetchall()
@@ -579,6 +644,8 @@ def EliminarPublicacion(id):
             print("No hay que borrar nada")
 
     db.execute("DELETE FROM publication WHERE id=:id", {"id": id})
+    db.execute("DELETE FROM commentary WHERE publication_id=:publication_id", {"publication_id": id})
+    db.execute("DELETE FROM likes WHERE publication_id_likes=:publication_id_likes", {"publication_id_likes": id})
     db.commit()
     return redirect("/perfil")
 
@@ -586,17 +653,154 @@ def EliminarPublicacion(id):
 def search():
     busqueda = request.args.get("search") 
     busqueda = (f"%{busqueda}%")
-    resultado = db.execute("SELECT * FROM users WHERE lower(name) LIKE lower(:busqueda)  OR \
-        lower(lastname) LIKE lower(:busqueda) \
-        OR lower(username) ILIKE lower(:busqueda)", 
-            {"busqueda": busqueda }).fetchall()
+    resultado = db.execute("SELECT * FROM users WHERE lower(name) LIKE lower(:busqueda) and id_users != :id_users \
+        OR lower(lastname) LIKE lower(:busqueda) and id_users != :id_users \
+        OR lower(username) LIKE lower(:busqueda) and id_users != :id_users", 
+            {"busqueda": busqueda, "id_users": session['google_id'] }).fetchall()
     print(resultado)
     return render_template("search.html", resultados=resultado)
 
-@app.route("/searchprofile/<string:id>", methods=["GET","POST"])
-def searchprofile(id):
-    return render_template("profile_user_search.html", id=id)
+@app.route("/searchprofile", methods=["POST", "GET"])
+def searchprofile():
+    if request.method == "POST":
+        id = request.form.get("id")
+        verificar_seguimiento = db.execute("SELECT id FROM follows WHERE user_id=:user_id and \
+            user_id_follows=:user_id_follows", {"user_id": session["google_id"], "user_id_follows": id}).fetchall()
+        if bool(verificar_seguimiento) == True:
+            seguido = True
+        else:
+            seguido = False
 
+        session["buscador"] = id
+        likes = db.execute("SELECT  likes.megusta, likes.id_like, likes.user_id,publication.id \
+            FROM publication INNER JOIN likes ON  likes.publication_id_likes = publication.id").fetchall()
+
+        seguidores = db.execute("SELECT user_id_follows FROM follows WHERE user_id_follows=:id", 
+        {"id": id }).fetchall()
+        seguidores = len(seguidores)
+        
+        seguidos = db.execute("SELECT user_id FROM follows WHERE user_id=:id", 
+        {"id": id }).fetchall()
+        
+        seguidos = len(seguidos)
+        ########    
+        #Informacion del perfil actual
+        rows = db.execute("SELECT * FROM users WHERE id_users=:id", {"id": id}).fetchall()
+        
+        #Imagenes de quien la publico dentro del perfil
+        rows2 = db.execute("SELECT users.id_users, users.foto_google, users.url_perfil,publication.id, publication.image_path, \
+            publication.descripcion, publication.date, users.username \
+            FROM users INNER JOIN publication ON  publication.user_id = users.id_users WHERE users.id_users = :id order by publication.id desc", \
+                        {"id": id}).fetchall()
+
+        rows3 = db.execute("SELECT users.id_users, users.foto_google, publication.id, commentary.id_comentario, commentary.publication_id, \
+            users.url_perfil, users.username, commentary.comentario, commentary.date \
+            FROM commentary INNER JOIN users ON  commentary .user_id = users.id_users\
+            INNER JOIN publication ON  publication.id = commentary.publication_id", \
+                        {}).fetchall()
+
+        #print(f"rows2: {rows2[0]['id']}")
+        print(rows2)
+        #SELECT users.id,publication.image_path,publication.descripcion,publication.date,users.username FROM users INNER JOIN publication ON users.id = publication.user_id
+        post = len(rows2)
+        content = {
+            #Usuario Actual
+            "user_actual": rows[0]["id_users"],
+            #perfil
+            "name": rows[0]["name"],
+            "lastname": rows[0]["lastname"],
+            "url_perfil": rows[0]["url_perfil"],
+            "descripcion": rows[0]["descripcion"],
+            "nacimiento": rows[0]["nacimiento"],
+            "permitir_foto_google": rows[0]["foto_google"],
+            "username": rows[0]["username"],
+            #Seguimiento
+            "post": post,
+            "seguidores": seguidores,
+            "seguidos": seguidos,
+            "seguido": seguido
+            
+        }
+            
+        return render_template("profilesearch.html", content=content,item=rows2, comentarios=rows3, likes=likes)
+    else:   
+        id  = request.form.get("id")
+        likes = db.execute("SELECT  likes.megusta, likes.id_like, likes.user_id,publication.id \
+            FROM publication INNER JOIN likes ON  likes.publication_id_likes = publication.id").fetchall()
+        
+        verificar_seguimiento = db.execute("SELECT id FROM follows WHERE user_id=:user_id and \
+            user_id_follows=:user_id_follows", {"user_id": session["google_id"], "user_id_follows": id}).fetchall()
+        if bool(verificar_seguimiento) == True:
+            seguido = True
+        else:
+            seguido = False
+
+        seguidores = db.execute("SELECT user_id_follows FROM follows WHERE user_id_follows=:id", 
+        {"id": id }).fetchall()
+        seguidores = len(seguidores)
+        
+        seguidos = db.execute("SELECT user_id FROM follows WHERE user_id=:id", 
+        {"id": id }).fetchall()
+        
+        seguidos = len(seguidos)
+        ########    
+        #Informacion del perfil actual
+        rows = db.execute("SELECT * FROM users WHERE id_users=:id", {"id": id}).fetchall()
+        
+        #Imagenes de quien la publico dentro del perfil
+        rows2 = db.execute("SELECT users.id_users, users.foto_google, users.url_perfil,publication.id, publication.image_path, \
+            publication.descripcion, publication.date, users.username \
+            FROM users INNER JOIN publication ON  publication.user_id = users.id_users WHERE users.id_users = :id order by publication.id desc", \
+                        {"id": id}).fetchall()
+
+        rows3 = db.execute("SELECT users.id_users, users.foto_google, publication.id, commentary.id_comentario, commentary.publication_id, \
+            users.url_perfil, users.username, commentary.comentario, commentary.date \
+            FROM commentary INNER JOIN users ON  commentary .user_id = users.id_users\
+            INNER JOIN publication ON  publication.id = commentary.publication_id", \
+                        {}).fetchall()
+
+        ######{{url_for('EliminarComentarioAdmin',id=comentarios2.id_comentario users_id=comentarios2.user_id)}}
+        # rows = db.execute("SELECT * FROM users WHERE id_users=:id", {"id": session["google_id"]}).fetchall()
+        # #Imagenes de quien la publico dentro del perfil
+        # rows2 = db.execute("SELECT users.id_users, publication.id, publication.image_path, \
+        #     publication.descripcion, publication.date, users.username \
+        #     FROM users INNER JOIN publication ON  publication.user_id = users.id_users  WHERE users.id_users = :id", \
+        #                 {"id": session["google_id"]}).fetchall()
+
+        # #
+        # rows3 = db.execute("SELECT users.id_users, publication.id, commentary.id_comentario, \
+        #     publication.date, users.url_perfil, users.username, commentary.comentario, commentary.date \
+        #     FROM publication INNER JOIN users ON  users.id_users = publication.user_id \
+        #     INNER JOIN commentary ON commentary.publication_id =  publication.id ", \
+        #                 {}).fetchall()
+
+        #print(f"rows2: {rows2[0]['id']}")
+        print(rows2)
+        #SELECT users.id,publication.image_path,publication.descripcion,publication.date,users.username FROM users INNER JOIN publication ON users.id = publication.user_id
+        post = len(rows2)
+        content = {
+            #Usuario Actual
+            "user_actual": rows[0]["id_users"],
+            #perfil
+            "name": rows[0]["name"],
+            "lastname": rows[0]["lastname"],
+            "url_perfil": rows[0]["url_perfil"],
+            "descripcion": rows[0]["descripcion"],
+            "nacimiento": rows[0]["nacimiento"],
+            "permitir_foto_google": rows[0]["foto_google"],
+            "username": rows[0]["username"],
+            #Seguimiento
+            "post": post,
+            "seguidores": seguidores,
+            "seguidos": seguidos,
+            "seguido": seguido
+            
+        }
+        
+        
+        return render_template("profilesearch.html", content=content,item=rows2, comentarios=rows3, likes=likes)
+
+#Agrega comentario desde el perfil
 @app.route("/add_comment/<string:id>", methods=["POST"])
 def add_comment(id):
     comentario = request.form.get("comment")
@@ -615,6 +819,7 @@ def add_comment(id):
         INNER JOIN commentary ON commentary.user_id =  users.id  WHERE users.id = 23"""
     return redirect("/perfil")
 
+#Editar comentario desde el perfil
 @app.route("/EditarComentario/<string:id>", methods=["GET","POST"])
 def EditarComentario(id):
     if request.method == "POST":
@@ -629,6 +834,7 @@ def EditarComentario(id):
     print(rows)
     return render_template("EditarComentario.html", rows=rows)
 
+#Elimimnar Comentario desde el perfil
 @app.route("/EliminarComentario/<string:id>")
 def EliminarComentario(id):
 
@@ -636,7 +842,16 @@ def EliminarComentario(id):
     db.commit()#like
     return redirect("/perfil")
 
-#Agrega y elimina el like 
+#Eliminar comentarios desde el perfil cuando es administrador de esa publicacion
+@app.route("/EliminarComentarioAdmin/<string:id>/<string:users_id>")
+def EliminarComentarioAdmin(id, users_id):
+
+    db.execute("DELETE FROM commentary WHERE id_comentario=:id and user_id=:user_id", 
+    {"id": id, "user_id": users_id})
+    db.commit()#like
+    return redirect("/perfil")
+
+#Agrega y elimina el like desde el perfil
 @app.route("/add_like/<string:id>", methods=["GET"])
 def add_like(id):
     print(id)
@@ -675,7 +890,46 @@ def add_like(id):
     
     return redirect("/perfil")
 
-#Inicio Pagina
+#Agrega y elimina el like desde el  Inicio
+@app.route("/add_like_Inicio/<string:id>", methods=["GET"])
+def add_like_Inicio(id):
+    print(id)
+    rows=db.execute("SELECT megusta FROM likes WHERE publication_id_likes=:id and user_id=:user_id", 
+    {"id": id,"user_id": session['google_id']}).fetchall()
+
+    print(rows)
+    if bool(rows) == False:
+        db.execute("INSERT INTO likes (user_id, publication_id_likes, megusta) VALUES (:user_id, :publication_id_likes, :megusta)",
+                            { "user_id": session["google_id"], 
+                              "publication_id_likes": id,                            
+                              "megusta": True})
+        db.commit()
+        print("entro y se inserto")
+    if bool(rows) == True:
+        rows2=db.execute("SELECT megusta,publication_id_likes FROM likes WHERE publication_id_likes=:id and user_id=:user_id", 
+        {"id": id,"user_id": session['google_id']}).fetchone()
+        #print(f"registro de me gusta {rows2[0]}")
+
+        if rows2[0] == True:
+            print("lo cambio a falso")
+            db.execute("UPDATE likes SET megusta = :megusta \
+            WHERE user_id = :id and publication_id_likes=:publication_id_likes", 
+            {"megusta": False, "id": session["google_id"], "publication_id_likes":id})
+            db.commit()
+        else:
+            print("es verdadero")
+            db.execute("UPDATE likes SET megusta = :megusta \
+            WHERE user_id = :id and publication_id_likes=:publication_id_likes", 
+            {"megusta": True, "id": session["google_id"], "publication_id_likes":id})
+            db.commit()
+        # db.execute("DELETE FROM likes WHERE publication_id_likes=:id and user_id=:user_id", 
+        # {"id": id, "user_id": session['google_id']})
+        # print("entro y se elimino")
+   
+    
+    return redirect("/Inicio")
+
+#Agrega y elimina el Comentario desde el  Inicio
 @app.route("/add_comment_inicio/<string:id>", methods=["POST"])
 def add_comment_inicio(id):
     print(f"Username google_id {session['google_id']}")
@@ -695,11 +949,111 @@ def add_comment_inicio(id):
         INNER JOIN commentary ON commentary.user_id =  users.id  WHERE users.id = 23"""
     return redirect("/Inicio")
 
+#Editar comentario desde el Inicio
+@app.route("/EditarcomentarioInicio/<string:id>", methods=["GET","POST"])
+def EditarcomentarioInicio(id):
+    if request.method == "POST":
+        comentario = request.form.get("comentario")
+        db.execute("UPDATE commentary SET comentario = :comentario \
+        WHERE id_comentario = :id", {"comentario": comentario, "id": id})
+        db.commit()
+
+        return redirect("/Inicio")
+
+    rows=db.execute("SELECT id_comentario, comentario FROM commentary WHERE id_comentario=:id", {"id": id}).fetchone()
+    print(rows)
+    return render_template("EditarcomentarioInicio.html", rows=rows)
+
+#Eliminar comentario desde el Inicio
+@app.route("/EliminarComentarioInicio/<string:id>")
+def EliminarComentarioInicio(id):
+
+    db.execute("DELETE FROM commentary WHERE id_comentario=:id", {"id": id})
+    db.commit()#like
+    return redirect("/Inicio")
+
+#Seguir usuario
+@app.route("/seguir/<string:id>",methods=["GET"])
+def seguir(id):
+    db.execute("INSERT INTO follows (user_id, user_id_follows) \
+                        VALUES (:user_id, :user_id_follows)",
+                            {"user_id": session['google_id'], 
+                            "user_id_follows": id })
+    db.commit()
+    #follows
+    #user_id
+    #user_id_follows
+    return redirect ("/searchprofile")
+
+@app.route("/DejarDeSeguir/<string:id>",methods=["GET"])
+def DejarDeSeguir(id):
+    db.execute("DELETE FROM follows WHERE user_id=:user_id and user_id_follows=:user_id_follows", 
+    {"user_id": session['google_id'], "user_id_follows": id})
+    db.commit()#like
+    return redirect ("/searchprofile")
+    #follows
+    #user_id
+    #user_id_follows
+
+@app.route("/descargar",methods=["GET", "POST"])
+@login_required
+def descargar():
+    if request.method == "POST":
+        link = request.form.get("link")
+        # LIMPIANDO ESPACIOS VACIOS
+        link = link.strip()
+        # VALIDACION ESPACIO VACIO
+        if link == "":
+            return redirect("/descargar")
+
+        opcion = request.form.get("plataforma")
+        if opcion == "youtube":
+            if descargar_plataformas(link,opcion) == "1":
+                abort(403)
+
+            formato = request.form.get("formato")
+            lista = descargar_plataformas(link,opcion)
+
+            miniatura = lista[0]
+
+            title = lista[1]
+
+            plataforma = lista[2]
+
+            links = lista[3]
+
+            title = (title[:25] + '..') if len(title) > 25 else title
+
+            if formato == "video":
+                return redirect(f"https://projectlounge.pw/ytdl/download?url={link}")
+
+            else:
+                formato_audio = descargar_audio(link)
+                return redirect(f"https://projectlounge.pw/ytdl/download?url={link}&format={formato_audio}")
+
+        else:
+            if descargar_plataformas(link,opcion) == "1":
+                abort(403)
+
+            lista = descargar_plataformas(link,opcion)
+            miniatura = lista[0]
+
+            title = lista[1]
+
+            plataforma = lista[2]
+
+            links = lista[3]
+
+            title = (title[:25] + '..') if len(title) > 25 else title
+
+            return redirect(f"https://projectlounge.pw/ytdl/download?url={link}")
+
+    else:
+        return render_template("descargar.html")
+
 
 @app.errorhandler(404)
-# inbuilt function which takes error as parameter
 def not_found(e):
-# defining function
   return "404" #render_template("404.html")
 
 if __name__ == "__main__":

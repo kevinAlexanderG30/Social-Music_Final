@@ -1,0 +1,84 @@
+{% extends "layout3.html" %}
+
+{% block title %}
+    Perfil
+{% endblock %}
+
+{%block main%}
+
+
+
+			<!-- Header -->
+				
+			<!-- Main -->
+				<section id="main" class="container">
+					<div class="row">
+						<div class="col-12">
+
+							<!-- Text -->
+								<section class="box">
+								 <form action="/descargar" method="post">
+
+									<div class="form-group">
+										<h4>Plataforma de descarga: </h4>
+										<input type="plataforma" name="youtube" id="plataforma" style="display: none;">
+										<h4 style="margin-top: 1rem;">Youtube </h4>
+						            </div>
+
+						            <div class="form-group" id="formato-yt">
+										<h4 style="margin-top: 1rem;">Introduzca formato: </h4>
+						            	<select name="formato">
+						                    <option value='video'>Video</option>
+						                    <option value='audio'>Audio</option>
+						            	</select>
+						            </div>
+
+						            <div class="form-group">
+						            	<h4 style="margin-top: 1rem;">Ingrese link: </h4>
+										<input type="text" required id="email textoo username2" name="link" for="email" placeholder="Introduzca link"/>
+						            	
+						       		</div>
+									
+						       		<input type="submit" style="margin-top:2rem;" id="botond" value="Descargar" />
+						       	</form>
+								</section>
+
+						</div>
+					</div>
+
+				</section>
+
+		
+
+		</div>
+			<!-- Scripts -->
+		<script src="{{ url_for('static',filename = 'js/youtube.js')}}"></script>
+			<script>
+
+				var link = document.getElementById("textoo");
+				window.onload = function() {
+					let boton = document.getElementById("botond")
+					let texto = link.value
+		            if(texto.trim() == ""){
+						boton.disabled = true;
+					}else{
+						boton.disabled = false;
+					}
+				}
+
+				link.addEventListener('change', (event) => {
+					let boton = document.getElementById("botond")
+					let texto = link.value
+		            if(texto.trim() == ""){
+						boton.disabled = true;
+					}else{
+						boton.disabled = false;
+					}
+
+				});
+			</script>
+
+{% endblock %}
+	
+		
+			
