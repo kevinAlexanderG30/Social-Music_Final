@@ -27,10 +27,10 @@
       {% else%}
           <h1 class="profile-user-name">{{content.username}}</h1>
       {%endif%}
-      {%if content.seguido == True%}
-        <a style="text-decoration: none;" href="{{url_for('seguir',id=content.user_actual)}}"><button type="button" class="btn2 btn-primary profile-edit-btn">Seguir</button></a> 
-       {%else%}
-       <a style="text-decoration: none;" href="{{url_for('seguir',id=content.user_actual)}}"><button type="button" class="btn2 btn-primary profile-edit-btn">Dejar de Seguir</button></a> 
+      {%if content.seguido == True%} 
+        <a style="text-decoration: none;" href="{{url_for('dejarseguir',id=content.user_actual)}}"><button type="button" class="btn2 btn-primary profile-edit-btn">Dejar de Seguir</button></a> 
+        {%else%}
+        <a style="text-decoration: none;" href="{{url_for('seguir',id=content.user_actual)}}"><button type="button" class="btn2 btn-primary profile-edit-btn">Seguir</button></a>
        {%endif%}
       <!-- <button type="button" id="cambiar_x"class="btn2 btn-primary profile-edit-btn"  data-bs-toggle="modal" data-bs-target="#exampleModal">Edit Profile</button>
       
@@ -142,7 +142,7 @@
               </div>
               <!-- <a href="#!" class="text-dark"><span>Share</span></a> -->
             </div>
-            <p class="mb-0">Liked by <a href="#!" class="text-muted font-weight-bold">John doe</a> & <a href="#!" class="text-muted font-weight-bold">25 others</a></p>
+            <p class="mb-0">Liked  <a href="#!" class="text-muted font-weight-bold"></a> & <a href="#!" class="text-muted font-weight-bold"></a></p>
           </div>
           <hr>
           <div class="post-block__comments">
@@ -168,7 +168,7 @@
                         <img src="static/img/{{comentarios2.url_perfil}}" alt="User img" class="author-img author-img--small mr-2">            
                     {%endif%}               
                     <div>
-                      <h6 class="mb-1"><a href="#!" class="text-dark">{{comentarios2.username}}</a> <small class="text-muted">Id {{comentarios2.id_comentario}}</small></h6>
+                      <h6 class="mb-1"><a href="#!" class="text-dark">{{comentarios2.username}}</a> <small class="text-muted">{{comentarios2.date}}</small></h6>
                                   
                       <p class="mb-1">{{comentarios2.comentario}}.</p>
                       

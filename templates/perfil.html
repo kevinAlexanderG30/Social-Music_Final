@@ -46,7 +46,7 @@
                        
                        <div id="sub__promo">                                
                             
-                          <input type="text" required id="email username2" name="username" for="email" placeholder="Nombre de usuario {{content.username}}"/>
+                          <input type="text" required id="email username2" name="username" value="{{content.username}}" for="email" placeholder="Nombre de usuario {{content.username}}"/>
                           <input type="text" required id="email name" name="name" value="{{content.name}}" for="email" placeholder="Nombre {{content.name}}"/>
                           <input type="text" required id="email lastname" name="lastname" value="{{content.lastname}}" for="email" placeholder="Apellido {{content.lastname}}"/>
                           <input type="text"  id="email descripcion" name="description" value="{{content.descripcion}}" for="email" placeholder="Descripcion {{content.descripcion}}"/>
@@ -149,14 +149,14 @@
               </div>
               <!-- <a href="#!" class="text-dark"><span>Share</span></a> -->
             </div>
-            <p class="mb-0">Liked by <a href="#!" class="text-muted font-weight-bold">John doe</a> & <a href="#!" class="text-muted font-weight-bold">25 others</a></p>
+            <p class="mb-0">Liked  <a href="#!" class="text-muted font-weight-bold"> </a>  <a href="#!" class="text-muted font-weight-bold"> </a></p>
           </div>
           <hr>
           <div class="post-block__comments">
             <!-- Comment Input -->
           <form action="{{url_for('add_comment',id=items.id)}}" method="post">
             <div class="input-group mb-3">
-              <input type="text" class="form-control" required name="comment" placeholder="Add your comment">
+              <input type="text" class="form-control" required name="comment" placeholder="Agrega tu comentario">
               <div class="input-group-append">
                   <button class="btn btn-primary" type="submit" id="button-addon2"><i class="fa fa-paper-plane"></i></button>
               </div>
@@ -175,7 +175,7 @@
                         <img src="static/img/{{comentarios2.url_perfil}}" alt="User img" class="author-img author-img--small mr-2">            
                     {%endif%}               
                     <div>
-                      <h6 class="mb-1"><a href="#!" class="text-dark">{{comentarios2.username}}</a> <small class="text-muted">Id {{comentarios2.id_comentario}}</small></h6>
+                      <h6 class="mb-1"><a href="#!" class="text-dark">{{comentarios2.username}}</a> <small class="text-muted"> {{comentarios2.date}}</small></h6>
                                   
                       <p class="mb-1">{{comentarios2.comentario}}.</p>
                       

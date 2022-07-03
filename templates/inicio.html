@@ -42,7 +42,7 @@
   <header id="header" class="header fixed-top">
     <div class="container-fluid container-xl d-flex align-items-center justify-content-between">
 
-      <a href="index.html" class="logo d-flex align-items-center">
+      <a href="/Inicio" class="logo d-flex align-items-center">
         <img src="static/img/logo.png" alt="">
         <span>Social Music</span>
       </a>
@@ -54,7 +54,7 @@
           <li><a class="nav-link scrollto" href="/descargar">Descargar Go</a></li>        
           <li class="dropdown"><a href="#"><span>Configuraciones</span> <i class="bi bi-chevron-down"></i></a>
             <ul>
-              <li><a href="#">Drop Down 1</a></li>
+              <!-- <li><a href="#">Drop Down 1</a></li> -->
               <li><a href="/logout">logout</a></li>
               
   
@@ -87,10 +87,10 @@
               <div class="d-flex justify-content-between">
                 <div class="d-flex mb-3">
                   <div class="mr-2">
-                    {% if items.foto_google == True %}                    
-                      <a href="#!" class="text-dark"><img src="{{items.url_perfil}}" alt="User" class="author-img"></a>                   
-                    {% elif items.foto_google == False %}
-                    <a href="#!" class="text-dark"><img src="static/img/{{items.url_perfil}}" alt="User" class="author-img"></a>               
+                    {% if items.foto_google == True %} 
+                      <a href="#" class="text-dark"><img src="{{items.url_perfil}}" alt="User" class="author-img"></a>                        
+                      {% elif items.foto_google == False %}
+                    <a href="#" class="text-dark"><img src="static/img/{{items.url_perfil}}" alt="User" class="author-img"></a>                               
                     {%endif%}                 
                   </div>
                   <div>
@@ -134,14 +134,14 @@
                   </div>
                   <!-- <a href="#!" class="text-dark"><span>Share</span></a> -->
                 </div>
-                <p class="mb-0">Liked by <a href="#!" class="text-muted font-weight-bold">John doe</a> & <a href="#!" class="text-muted font-weight-bold">25 others</a></p>
+                <p class="mb-0">Liked  <a href="#!" class="text-muted font-weight-bold"></a>  <a href="#!" class="text-muted font-weight-bold"> </a></p>
               </div>
               <hr>
               <div class="post-block__comments">
                 <!-- Comment Input -->
               <form action="{{url_for('add_comment_inicio',id=items.id)}}" method="post">
                 <div class="input-group mb-3">
-                  <input type="text" class="form-control" required name="comment" placeholder="Add your comment {{items.id}}">
+                  <input type="text" class="form-control" required name="comment" placeholder="Agrega tu comentario">
                   <div class="input-group-append">
                       <button class="btn btn-primary" type="submit" id="button-addon2"><i class="fa fa-paper-plane"></i></button>
                   </div>
@@ -161,7 +161,7 @@
                         <img src="static/img/{{comentarios2.url_perfil}}" alt="User img" class="author-img author-img--small mr-2">            
                     {%endif%}               
                     <div>
-                      <h6 class="mb-1"><a href="#!" class="text-dark">{{comentarios2.username}}</a> <small class="text-muted">Id {{comentarios2.id_comentario}}</small></h6>
+                      <h6 class="mb-1"><a href="#!" class="text-dark">{{comentarios2.username}}</a> <small class="text-muted">{{comentarios2.date}}</small></h6>
                                   
                       <p class="mb-1">{{comentarios2.comentario}}.</p>
                       

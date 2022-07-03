@@ -16,7 +16,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from werkzeug.utils import secure_filename
 from os import remove
-from datetime import datetime
+from datetime import datetime, timedelta
 from functions import *
 
 app = Flask(__name__)
@@ -196,7 +196,7 @@ def register():
             "lastname": lastname,
             "nacimiento": nacimiento,
             "is_verified": True,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=1000),
+            "exp": datetime.utcnow() + timedelta(minutes=1000),
 
         }
 
@@ -214,7 +214,7 @@ def register():
         from_email='tkxk3vin@gmail.com',
         to_emails=email,
         subject='Social Musci WEB50-FINAL',
-        html_content= f'Confirmacion de email por parte de Social Music <a href="http://localhost:5000/is_verified/{token}">"Confirmar"</a> {token}')
+        html_content= f'Confirmacion de email por parte de Social Music <a href="http://localhost:5000/is_verified/{token}">"Confirmar"</a>')
         try:
             sg = SendGridAPIClient("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")
             response = sg.send(message)
@@ -279,7 +279,7 @@ def callback():
         from_email='tkxk3vin@gmail.com',
         to_emails= id_info.get("email"),
         subject='Social Musci WEB50-FINAL',
-        html_content= f'Bienvenido a Social Music, usted podra acceder mediante Google o el inicio rapido de la app con una contraseña proporcionada: 123456 luego podra cambiar usted la contraseña una vez ingresado en la app igualmente su informacion y nombre<a href="http://localhost:5000/login">"Confirmar"</a>')
+        html_content= f'Bienvenido a Social Music, usted podra acceder mediante Google o el inicio rapido de la app con una contraseña proporcionada: 123456<a href="http://localhost:5000/login">"Confirmar"</a> <h1><h1>')
         try:
             sg = SendGridAPIClient("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")
             response = sg.send(message)
@@ -440,8 +440,8 @@ def is_verified(token):
         message = f"Token is invalid --> {e}"
         print({"message": message})
 
-    return jsonify({"decode_data"
-    : decode_data}) #render_template("verified.html")
+    return render_template("verified.html") #render_template("verified.html") jsonify({"decode_data"
+    #: decode_data})
 
 @app.route("/configuraciones", methods=["GET", "POST"])
 def configuraciones():
@@ -721,10 +721,12 @@ def searchprofile():
             "seguido": seguido
             
         }
-            
+        print("post searchprofile")
         return render_template("profilesearch.html", content=content,item=rows2, comentarios=rows3, likes=likes)
     else:   
-        id  = request.form.get("id")
+        id  =  session["buscador"]
+        if not id:
+            id =  request.form.get("id")
         likes = db.execute("SELECT  likes.megusta, likes.id_like, likes.user_id,publication.id \
             FROM publication INNER JOIN likes ON  likes.publication_id_likes = publication.id").fetchall()
         
@@ -985,8 +987,8 @@ def seguir(id):
     #user_id_follows
     return redirect ("/searchprofile")
 
-@app.route("/DejarDeSeguir/<string:id>",methods=["GET"])
-def DejarDeSeguir(id):
+@app.route("/dejarseguir/<string:id>",methods=["GET"])
+def dejarseguir(id):
     db.execute("DELETE FROM follows WHERE user_id=:user_id and user_id_follows=:user_id_follows", 
     {"user_id": session['google_id'], "user_id_follows": id})
     db.commit()#like
